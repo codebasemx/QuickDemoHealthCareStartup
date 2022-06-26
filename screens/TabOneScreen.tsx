@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
@@ -9,13 +9,52 @@ import { RootTabScreenProps } from '../types';
 import alfieImage from "../assets/images/alfie.png"
 import phsyicianImg from "../assets/images/hasan.png"
 
+const DUMMY_PRESCRIPTIONS_NEW = [
+  { dr: "", drugName: "" },
+  { dr: "", drugName: "" },
+  { dr: "", drugName: "" },
+]
+
+const DUMMY_PRESCRIPTIONS_SUGGESTED = [
+  { dr: "", drugName: "Cabometyx" },
+  { dr: "", drugName: "Kariva" },
+  { dr: "", drugName: "Macrobid" },
+  { dr: "", drugName: "Wegovy" },
+]
+
+const api = {
+  getPrescriptions() {
+    return new Promise( resolve => {
+      setTimeout(() => {
+        resolve({ new: DUMMY_PRESCRIPTIONS_NEW, suggested: DUMMY_PRESCRIPTIONS_SUGGESTED })
+      }, 3000)
+    })
+  }
+}
+
 export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie Demo'>) {
 
-  const [ activeLink, setActiveLink ] = useState(0)
+  const [ activeLink, setActiveLink ]             = useState(0)
+  const [ prescriptionType, setPrescriptionType ] = useState('new')
+  const [ prescriptions, setPrescriptions ]       = useState({ new: [], suggested: [] })
+  const [ isLoadingPrescriptions, setIsLoadingPrescriptions ] = useState(false)
+
+  //On mount, get a list of prescriptions the
+  //user should see for their diet plan...
+  useEffect(() => {
+    setIsLoadingPrescriptions(true)
+    api.getPrescriptions()
+    .then(prescriptions => {
+      setPrescriptions(prescriptions)
+
+      setIsLoadingPrescriptions(false)
+    })
+
+  }, [])
 
   const onLinkClick = () => {
-    console.log(activeLink)
     setActiveLink(activeLink === 0 ? 1 : 0 )
+    setPrescriptionType(activeLink === 0 ? 'suggested' : 'new')
   }
 
   return (
@@ -28,40 +67,32 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
 
           <View style={ styles.links }>
             <ActiveLink active={ activeLink === 0 } onClick={ onLinkClick }>
-              3 new
+              { `${ prescriptions.new.length } new` }
             </ActiveLink>
             <ActiveLink active={ activeLink === 1 } onClick={ onLinkClick }>
-              2 suggestions
+              { `${ prescriptions.suggested.length } suggested` }
             </ActiveLink>
           </View>
         </View>
         <View style={ styles.prescriptionContainer }>
-          <View style={ styles.prescription }>
-            <View style={ styles.prescriptionHeader }>
-              <Text style={ styles.drugName }>Amoxicillin 250mg</Text>
-              <View style={ styles.badgeContainer }>
-                <Text style={ styles.badgeText }>New</Text>
+          { prescriptions[ prescriptionType ].map( ( p, k ) => (
+            <View key={ k } style={ styles.prescription }>
+              <View style={ styles.prescriptionHeader }>
+                <Text style={ styles.drugName }>{ p.drugName } 250mg</Text>
+                <View style={ styles.badgeContainer }>
+                  <Text style={ styles.badgeText }>New</Text>
+                </View>
               </View>
-            </View>
-            <View style={ styles.physicianContainer }>
-              <Image style={ styles.phsyicianImg } source={ phsyicianImg } />
-              <View style={ styles.phsyicianInfo }>
-                <Text style={ styles.phsyicianName }>Hasan Syed</Text>
-                <Text style={ styles.userActivityText }>3 hours ago</Text>
+              <View style={ styles.physicianContainer }>
+                <Image style={ styles.phsyicianImg } source={ phsyicianImg } />
+                <View style={ styles.phsyicianInfo }>
+                  <Text style={ styles.phsyicianName }>Hasan Syed</Text>
+                  <Text style={ styles.userActivityText }>3 hours ago</Text>
+                </View>
               </View>
+              <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
             </View>
-            <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
-          </View>
-          <View style={ styles.prescription }>
-          </View>
-          <View style={ styles.prescription }>
-          </View>
-          <View style={ styles.prescription }>
-          </View>
-          <View style={ styles.prescription }>
-          </View>
-          <View style={ styles.prescription }>
-          </View>
+          )) }
         </View>
       </View>
     </ScrollView>
@@ -90,7 +121,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3622b1",
   },
   container: {
-    backgroundColor: "#e7e3fd"
+    backgroundColor: "#e7e3fd",
+    minHeight: 800
   },
   header: {
     backgroundColor: '#3622b1',
@@ -121,9 +153,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: 'white',
     marginRight: 10
-  },
-  activeLink: {
-    textDecorationLine: 'underline'
   },
   bell: {
     marginBottom: 25,

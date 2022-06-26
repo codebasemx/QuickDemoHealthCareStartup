@@ -77,7 +77,8 @@ function BottomTabNavigator() {
         name="Alfie"
         component={TabOneScreen}
         options={({ navigation }: RootTabScreenProps<'Alfie'>) => ({
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          title: "Alfie",
           tabBarLabel: () => null,
           headerRight: () => (
             <Pressable
@@ -99,7 +100,7 @@ function BottomTabNavigator() {
         name="TabTwo"
         component={TabTwoScreen}
         options={{
-          title: 'Tab Two',
+          title: 'Habits',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
