@@ -1,4 +1,5 @@
-import { Image, ScrollView, StyleSheet } from 'react-native';
+import React, { useState } from "react"
+import { TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Icon } from "@react-native-material/core";
@@ -6,39 +7,96 @@ import { Text, View } from '../components/Themed';
 import { RootTabScreenProps } from '../types';
 
 import alfieImage from "../assets/images/alfie.png"
+import phsyicianImg from "../assets/images/hasan.png"
 
 export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie Demo'>) {
-  return (
-    <View style={styles.container }>
-      <View style={ styles.header }>
-        <Icon name="bell" style={ styles.bell } size={24} color="white"/>
-        <Text style={styles.greeting }>Hello, Alexander  👋</Text>
-        <Text style={styles.headerText}>Your recent prescriptions</Text>
 
-        <View style={ styles.links }>
-          <View style={ styles.activeLinkContainer }>
-            <Text style={ styles.tabLink }>3 new</Text>
+  const [ activeLink, setActiveLink ] = useState(0)
+
+  const onLinkClick = () => {
+    console.log(activeLink)
+    setActiveLink(activeLink === 0 ? 1 : 0 )
+  }
+
+  return (
+    <ScrollView style={styles.containerWrapper }>
+      <View style={styles.container}>
+        <View style={ styles.header }>
+          <Icon name="bell" style={ styles.bell } size={24} color="white"/>
+          <Text style={styles.greeting }>Hello, Alexander  👋</Text>
+          <Text style={styles.headerText}>Your recent prescriptions</Text>
+
+          <View style={ styles.links }>
+            <ActiveLink active={ activeLink === 0 } onClick={ onLinkClick }>
+              3 new
+            </ActiveLink>
+            <ActiveLink active={ activeLink === 1 } onClick={ onLinkClick }>
+              2 suggestions
+            </ActiveLink>
           </View>
-          <Text style={styles.tabLink}>2 suggestions</Text>
+        </View>
+        <View style={ styles.prescriptionContainer }>
+          <View style={ styles.prescription }>
+            <View style={ styles.prescriptionHeader }>
+              <Text style={ styles.drugName }>Amoxicillin 250mg</Text>
+              <View style={ styles.badgeContainer }>
+                <Text style={ styles.badgeText }>New</Text>
+              </View>
+            </View>
+            <View style={ styles.physicianContainer }>
+              <Image style={ styles.phsyicianImg } source={ phsyicianImg } />
+              <View style={ styles.phsyicianInfo }>
+                <Text style={ styles.phsyicianName }>Hasan Syed</Text>
+                <Text style={ styles.userActivityText }>3 hours ago</Text>
+              </View>
+            </View>
+            <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
+          </View>
+          <View style={ styles.prescription }>
+          </View>
+          <View style={ styles.prescription }>
+          </View>
+          <View style={ styles.prescription }>
+          </View>
+          <View style={ styles.prescription }>
+          </View>
+          <View style={ styles.prescription }>
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
+const ActiveLink = ({ active = false, children, onClick }) => {
+
+  return (
+    <TouchableOpacity onPress={ onClick }>
+      { active ? 
+        <View style={ active? styles.activeLinkContainer : styles.inactive }>
+          <Text style={ styles.tabLink }>{ children }</Text>
+        </View>
+        :
+        <Text style={ styles.tabLink }>{ children }</Text>
+      }
+    </TouchableOpacity>
+  )
+}
+
 const styles = StyleSheet.create({
-  container: {
+  containerWrapper: {
     flex: 1,
     color: 'white',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    backgroundColor: "#3622b1",
+  },
+  container: {
+    backgroundColor: "#e7e3fd"
   },
   header: {
     backgroundColor: '#3622b1',
     width: '100%',
     paddingHorizontal: 30,
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 60,
     borderBottomLeftRadius: 50
   },
   headerText: {
@@ -48,12 +106,14 @@ const styles = StyleSheet.create({
   },
   tabLink: {
     fontWeight: 'bold',
+    marginRight: 10,
     color: '#eee',
   },
   links: {
     display: 'flex',
     flexDirection: 'row',
-    backgroundColor: 'inherit'
+    backgroundColor: 'inherit',
+    marginBottom: 20,
   },
   activeLinkContainer: {
     paddingBottom: 5,
@@ -69,13 +129,70 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   greeting: {
-    fontSize: 25,
+    fontSize: 22,
     color: '#eee',
     marginBottom: 5,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  prescriptionContainer: {
+    backgroundColor: 'inherit',
+    marginTop: -50
   },
+  prescription: {
+    backgroundColor: '#fbfbfe',
+    marginVertical: 10,
+    marginHorizontal: 20,
+    borderRadius: 30,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    minHeight: 100,
+    shadowOffset: {
+      width: 10,
+      height:10 
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 20
+  },
+  prescriptionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'inherit',
+    justifyContent: 'space-between'
+  },
+  drugName: {
+    color: "#666",
+    fontWeight: "bold"
+  },
+  badgeContainer: {
+    backgroundColor: "#c5fff2",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15
+  },
+  badgeText: {
+    color: "#666",
+    fontWeight: "bold",
+  },
+  physicianContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'inherit',
+    marginBottom: 10
+  },
+  phsyicianImg: {
+    width: 40,
+    height: 40,
+    borderRadius: 20
+  },
+  phsyicianInfo: {
+    backgroundColor: 'inherit'
+  },
+  phsyicianName: {
+    color: "#666",
+  },
+  userActivityText: {
+    opacity: 0.3
+  },
+  sendToPharmacy: {
+    color: "#3622b1",
+    fontWeight: 'bold'
+  }
 });

@@ -19,16 +19,15 @@ import TabTwoScreen from '../screens/TabTwoScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
 
-console.log(DefaultTheme.colors)
 const AlfieTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: "rgb(0,0,0)",
-    card: "#3622b1"
+    card: "#3622b1",
+    border: "#3622b1",
   }
 }
-console.log(AlfieTheme)
+
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
     <NavigationContainer
@@ -71,15 +70,15 @@ function BottomTabNavigator() {
       initialRouteName="Alfie"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
-        tabBarStyle: { backgroundColor: '#3622b1' },
+        tabBarStyle: { backgroundColor: 'white', borderWidth: 0, border: 'white' },
         tabBarOptions: { }
       }}>
       <BottomTab.Screen
         name="Alfie"
         component={TabOneScreen}
         options={({ navigation }: RootTabScreenProps<'Alfie'>) => ({
-          title: 'Alfie',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarLabel: () => null,
           headerRight: () => (
             <Pressable
               onPress={() => navigation.navigate('Modal')}
@@ -87,8 +86,8 @@ function BottomTabNavigator() {
                 opacity: pressed ? 0.5 : 1,
               })}>
               <FontAwesome
-                name="info-circle"
-                size={25}
+                name="heart"
+                size={20}
                 color={Colors[colorScheme].text}
                 style={{ marginRight: 15 }}
               />
