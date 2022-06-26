@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
-import { TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from "react"
+import { ActivityIndicator, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Icon } from "@react-native-material/core";
@@ -34,10 +34,33 @@ const api = {
 
 export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie Demo'>) {
 
-  const [ activeLink, setActiveLink ]             = useState(0)
-  const [ prescriptionType, setPrescriptionType ] = useState('new')
-  const [ prescriptions, setPrescriptions ]       = useState({ new: [], suggested: [] })
+  const [ activeLink, setActiveLink ]               = useState(0)
+  const [ prescriptionType, setPrescriptionType ]   = useState('new')
+  const [ prescriptions, setPrescriptions ]         = useState({ new: [], suggested: [] })
+  const [ scrollViewBgColor, setScrollViewBgColor ] = useState(BG_LIGHT)
   const [ isLoadingPrescriptions, setIsLoadingPrescriptions ] = useState(false)
+
+  //Use the useRef hook to prevent multiple setState
+  //calls to change the background color based on the scroll position
+  const svColor = useRef(BG_LIGHT)
+
+  const onScroll = event => {
+    const {
+      nativeEvent: {
+        contentOffset: {x, y},
+        contentSize: {height, width},
+      }
+    } = event
+
+    //Determine if we need to switch the backgroun color...
+    if ( y > 30 && svColor.current === BG_DARK ) {
+      svColor.current = BG_LIGHT
+      setScrollViewBgColor(BG_LIGHT)
+    } else if ( y < 30 && svColor.current === BG_LIGHT ) {
+      svColor.current = BG_DARK
+      setScrollViewBgColor(BG_DARK)
+    }
+  }
 
   //On mount, get a list of prescriptions the
   //user should see for their diet plan...
@@ -52,13 +75,17 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
 
   }, [])
 
+
   const onLinkClick = () => {
     setActiveLink(activeLink === 0 ? 1 : 0 )
     setPrescriptionType(activeLink === 0 ? 'suggested' : 'new')
   }
 
   return (
-    <ScrollView style={styles.containerWrapper }>
+    <ScrollView
+      onScroll={ onScroll }
+      scrollEventThrottle={ 10 }
+      style={{ ...styles.containerWrapper, backgroundColor: scrollViewBgColor }}>
       <View style={styles.container}>
         <View style={ styles.header }>
           <Icon name="bell" style={ styles.bell } size={24} color="white"/>
@@ -74,26 +101,32 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
             </ActiveLink>
           </View>
         </View>
-        <View style={ styles.prescriptionContainer }>
-          { prescriptions[ prescriptionType ].map( ( p, k ) => (
-            <View key={ k } style={ styles.prescription }>
-              <View style={ styles.prescriptionHeader }>
-                <Text style={ styles.drugName }>{ p.drugName } 250mg</Text>
-                <View style={ styles.badgeContainer }>
-                  <Text style={ styles.badgeText }>New</Text>
+        { isLoadingPrescriptions === true ?
+          <View style={ styles.activityIndicatorContainer }>
+            <ActivityIndicator />
+          </View>
+          :
+          <View style={ styles.prescriptionContainer }>
+            { prescriptions[ prescriptionType ].map( ( p, k ) => (
+              <View key={ k } style={ styles.prescription }>
+                <View style={ styles.prescriptionHeader }>
+                  <Text style={ styles.drugName }>{ p.drugName } 250mg</Text>
+                  <View style={ styles.badgeContainer }>
+                    <Text style={ styles.badgeText }>New</Text>
+                  </View>
                 </View>
-              </View>
-              <View style={ styles.physicianContainer }>
-                <Image style={ styles.phsyicianImg } source={ phsyicianImg } />
-                <View style={ styles.phsyicianInfo }>
-                  <Text style={ styles.phsyicianName }>Hasan Syed</Text>
-                  <Text style={ styles.userActivityText }>3 hours ago</Text>
+                <View style={ styles.physicianContainer }>
+                  <Image style={ styles.phsyicianImg } source={ phsyicianImg } />
+                  <View style={ styles.phsyicianInfo }>
+                    <Text style={ styles.phsyicianName }>Hasan Syed</Text>
+                    <Text style={ styles.userActivityText }>3 hours ago</Text>
+                  </View>
                 </View>
+                <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
               </View>
-              <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
-            </View>
-          )) }
-        </View>
+            )) }
+          </View>
+        }
       </View>
     </ScrollView>
   );
@@ -114,15 +147,23 @@ const ActiveLink = ({ active = false, children, onClick }) => {
   )
 }
 
+const BG_LIGHT  = '#e7e3fd'
+const BG_DARK   = '#3622b1'
+
 const styles = StyleSheet.create({
   containerWrapper: {
     flex: 1,
     color: 'white',
-    backgroundColor: "#3622b1",
   },
   container: {
     backgroundColor: "#e7e3fd",
     minHeight: 800
+  },
+  activityIndicatorContainer: {
+    flex: 1,
+    backgroundColor: 'inherit',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   header: {
     backgroundColor: '#3622b1',
