@@ -1,13 +1,22 @@
+import _ from "lodash"
 import { useContext, useEffect } from "react"
 import { ScrollView, StyleSheet } from 'react-native';
 
+import { Icon } from "@react-native-material/core";
 import { useIsFocused } from '@react-navigation/native'
 import { Text, View } from '../components/Themed'
 
 import EditScreenInfo from '../components/EditScreenInfo'
 import { ThemeContext } from "../contexts"
 
-const HABITS = [ 1,2,3 ]
+const HABITS = [
+  { iconName: "pen"},
+  { iconName: "bell"},
+  { iconName: "run"},
+  { iconName: "yoga"},
+  { iconName: "phone"},
+  { iconName: "briefcase"},
+]
 
 export default function TabTwoScreen() {
 
@@ -24,13 +33,16 @@ export default function TabTwoScreen() {
   }, [ isFocused ])
 
   return (
-    <ScrollView contentContainerStyle={ styles.container }>
-
-      { HABITS.map( (h, i) => {
+    <ScrollView style={{ backgroundColor: "#3622b1" }} contentContainerStyle={ styles.container }>
+    
+      { _.chunk(HABITS, 2).map( (chunk, i) => {
         return (
           <View key={ i } style={ styles.activityRow }>
-            <View style={ styles.activity }/>
-            <View style={ styles.activity }/>
+            { chunk.map(( activity, i ) => (
+                <View key={ i } style={ styles.activity }>
+                <Icon name={ activity.iconName } style={ styles.bell } size={50} color="white"/>
+                </View>
+            )) }
           </View>
         )
       })}
@@ -40,11 +52,13 @@ export default function TabTwoScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 100,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 40,
-    backgroundColor: 'inherit'
+    backgroundColor: 'inherit',
+    backgroundColor: "#3622b1",
   },
   title: {
     fontSize: 20,
@@ -60,8 +74,11 @@ const styles = StyleSheet.create({
   activity: {
     width: 150,
     height: 150,
+    justifyContent: 'center',
+    alignItems:'center',
     borderWidth: 7,
     borderColor: "#3622b1",
+    borderColor: "#eee",
     backgroundColor: "inherit",
     borderRadius: 75,
   },

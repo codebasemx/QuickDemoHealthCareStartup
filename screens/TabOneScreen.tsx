@@ -5,6 +5,7 @@ import EditScreenInfo from '../components/EditScreenInfo';
 import { Icon } from "@react-native-material/core";
 import { Text, View } from '../components/Themed';
 import { RootTabScreenProps } from '../types';
+import { Snackbar } from "@react-native-material/core";
 
 import alfieImage from "../assets/images/alfie.png"
 import phsyicianImg from "../assets/images/hasan.png"
@@ -39,10 +40,16 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
   const [ prescriptions, setPrescriptions ]         = useState({ new: [], suggested: [] })
   const [ scrollViewBgColor, setScrollViewBgColor ] = useState(BG_LIGHT)
   const [ isLoadingPrescriptions, setIsLoadingPrescriptions ] = useState(false)
+  const [ shouldShowSnackbar, setShouldShowSnackbar ]         = useState(false)
 
   const sendDrugToCustomer = drugName => {
     console.log(`DEMO: Sending ${ drugName } to customer.`)
     console.log("DEMO: Calling back-end.")
+
+    setShouldShowSnackbar(true)
+    setTimeout(() => {
+      setShouldShowSnackbar(false)
+    }, 3000)
   }
 
   const confirmSendPrescription = drugName => {
@@ -101,55 +108,64 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
   }
 
   return (
-    <ScrollView
-      onScroll={ onScroll }
-      scrollEventThrottle={ 10 }
-      style={{ ...styles.containerWrapper, backgroundColor: scrollViewBgColor }}>
-      <View style={styles.container}>
-        <View style={ styles.header }>
-          <Icon name="bell" style={ styles.bell } size={24} color="white"/>
-          <Text style={styles.greeting }>Hello, Alexander  👋</Text>
-          <Text style={styles.headerText}>Your recent prescriptions</Text>
+    <>
+      <ScrollView
+        onScroll={ onScroll }
+        scrollEventThrottle={ 10 }
+        style={{ ...styles.containerWrapper, backgroundColor: scrollViewBgColor }}>
+        <View style={styles.container}>
+          <View style={ styles.header }>
+            <Icon name="bell" style={ styles.bell } size={24} color="white"/>
+            <Text style={styles.greeting }>Hello, Alexander  👋</Text>
+            <Text style={styles.headerText}>Your recent prescriptions</Text>
 
-          <View style={ styles.links }>
-            <ActiveLink active={ activeLink === 0 } onPress={ () => onLinkPress('new') }>
-              { `${ prescriptions.new.length } new` }
-            </ActiveLink>
-            <ActiveLink active={ activeLink === 1 } onPress={ () => onLinkPress('suggested') }>
-              { `${ prescriptions.suggested.length } suggested` }
-            </ActiveLink>
+            <View style={ styles.links }>
+              <ActiveLink active={ activeLink === 0 } onPress={ () => onLinkPress('new') }>
+                { `${ prescriptions.new.length } new` }
+              </ActiveLink>
+              <ActiveLink active={ activeLink === 1 } onPress={ () => onLinkPress('suggested') }>
+                { `${ prescriptions.suggested.length } suggested` }
+              </ActiveLink>
+            </View>
           </View>
+          { isLoadingPrescriptions === true ?
+            <View style={ styles.activityIndicatorContainer }>
+              <ActivityIndicator />
+            </View>
+            :
+            <View style={ styles.prescriptionContainer }>
+              { prescriptions[ prescriptionType ].map( ( p, k ) => (
+                <View key={ k } style={ styles.prescription }>
+                  <View style={ styles.prescriptionHeader }>
+                    <Text style={ styles.drugName }>{ p.drugName } 250mg</Text>
+                    <View style={ styles.badgeContainer }>
+                      <Text style={ styles.badgeText }>{ prescriptionType === 'new' ? "NEW" : "SUGGESTED" }</Text>
+                    </View>
+                  </View>
+                  <View style={ styles.physicianContainer }>
+                    <Image style={ styles.phsyicianImg } source={ phsyicianImg } />
+                    <View style={ styles.phsyicianInfo }>
+                      <Text style={ styles.phsyicianName }>Hasan Syed</Text>
+                      <Text style={ styles.userActivityText }>3 hours ago</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity onPress={ () => confirmSendPrescription(p.drugName) }>
+                    <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
+                  </TouchableOpacity>
+                </View>
+              )) }
+            </View>
+          }
         </View>
-        { isLoadingPrescriptions === true ?
-          <View style={ styles.activityIndicatorContainer }>
-            <ActivityIndicator />
-          </View>
-          :
-          <View style={ styles.prescriptionContainer }>
-            { prescriptions[ prescriptionType ].map( ( p, k ) => (
-              <View key={ k } style={ styles.prescription }>
-                <View style={ styles.prescriptionHeader }>
-                  <Text style={ styles.drugName }>{ p.drugName } 250mg</Text>
-                  <View style={ styles.badgeContainer }>
-                    <Text style={ styles.badgeText }>{ prescriptionType === 'new' ? "NEW" : "SUGGESTED" }</Text>
-                  </View>
-                </View>
-                <View style={ styles.physicianContainer }>
-                  <Image style={ styles.phsyicianImg } source={ phsyicianImg } />
-                  <View style={ styles.phsyicianInfo }>
-                    <Text style={ styles.phsyicianName }>Hasan Syed</Text>
-                    <Text style={ styles.userActivityText }>3 hours ago</Text>
-                  </View>
-                </View>
-                <TouchableOpacity onPress={ () => confirmSendPrescription(p.drugName) }>
-                  <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
-                </TouchableOpacity>
-              </View>
-            )) }
-          </View>
-        }
-      </View>
-    </ScrollView>
+      </ScrollView>
+      { shouldShowSnackbar ?
+        <Snackbar
+        message="Your prescription will arrive within 3 days."
+        style={{ position: "absolute", start: 16, end: 16, bottom: 16 }} />
+        :
+        null
+      }
+    </>
   );
 }
 
