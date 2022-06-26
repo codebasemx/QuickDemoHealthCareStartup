@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
+import { Alert, ActivityIndicator, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Icon } from "@react-native-material/core";
@@ -10,9 +10,9 @@ import alfieImage from "../assets/images/alfie.png"
 import phsyicianImg from "../assets/images/hasan.png"
 
 const DUMMY_PRESCRIPTIONS_NEW = [
-  { dr: "", drugName: "" },
-  { dr: "", drugName: "" },
-  { dr: "", drugName: "" },
+  { dr: "", drugName: "Vistaril" },
+  { dr: "", drugName: "Gabapentin" },
+  { dr: "", drugName: "Gadodiamide" },
 ]
 
 const DUMMY_PRESCRIPTIONS_SUGGESTED = [
@@ -39,6 +39,26 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
   const [ prescriptions, setPrescriptions ]         = useState({ new: [], suggested: [] })
   const [ scrollViewBgColor, setScrollViewBgColor ] = useState(BG_LIGHT)
   const [ isLoadingPrescriptions, setIsLoadingPrescriptions ] = useState(false)
+
+  const sendDrugToCustomer = drugName => {
+    console.log(`DEMO: Sending ${ drugName } to customer.`)
+    console.log("DEMO: Calling back-end.")
+  }
+
+  const confirmSendPrescription = drugName => {
+    Alert.alert(
+      `Ready to get your ${ drugName } prescription?`,
+      "We'll send it to your default address",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => sendDrugToCustomer(drugName) }
+      ]
+    )
+  }
 
   //Use the useRef hook to prevent multiple setState
   //calls to change the background color based on the scroll position
@@ -75,10 +95,9 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
 
   }, [])
 
-
-  const onLinkClick = () => {
-    setActiveLink(activeLink === 0 ? 1 : 0 )
-    setPrescriptionType(activeLink === 0 ? 'suggested' : 'new')
+  const onLinkPress = clickedLink => {
+    setActiveLink(clickedLink === 'new' ? 0 : 1 )
+    setPrescriptionType(clickedLink)
   }
 
   return (
@@ -93,10 +112,10 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
           <Text style={styles.headerText}>Your recent prescriptions</Text>
 
           <View style={ styles.links }>
-            <ActiveLink active={ activeLink === 0 } onClick={ onLinkClick }>
+            <ActiveLink active={ activeLink === 0 } onPress={ () => onLinkPress('new') }>
               { `${ prescriptions.new.length } new` }
             </ActiveLink>
-            <ActiveLink active={ activeLink === 1 } onClick={ onLinkClick }>
+            <ActiveLink active={ activeLink === 1 } onPress={ () => onLinkPress('suggested') }>
               { `${ prescriptions.suggested.length } suggested` }
             </ActiveLink>
           </View>
@@ -112,7 +131,7 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
                 <View style={ styles.prescriptionHeader }>
                   <Text style={ styles.drugName }>{ p.drugName } 250mg</Text>
                   <View style={ styles.badgeContainer }>
-                    <Text style={ styles.badgeText }>New</Text>
+                    <Text style={ styles.badgeText }>{ prescriptionType === 'new' ? "NEW" : "SUGGESTED" }</Text>
                   </View>
                 </View>
                 <View style={ styles.physicianContainer }>
@@ -122,7 +141,9 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
                     <Text style={ styles.userActivityText }>3 hours ago</Text>
                   </View>
                 </View>
-                <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
+                <TouchableOpacity onPress={ () => confirmSendPrescription(p.drugName) }>
+                  <Text style={ styles.sendToPharmacy }>Send to pharmacy near you</Text>
+                </TouchableOpacity>
               </View>
             )) }
           </View>
@@ -132,10 +153,10 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'Alfie D
   );
 }
 
-const ActiveLink = ({ active = false, children, onClick }) => {
+const ActiveLink = ({ active = false, children, onPress }) => {
 
   return (
-    <TouchableOpacity onPress={ onClick }>
+    <TouchableOpacity onPress={ onPress }>
       { active ? 
         <View style={ active? styles.activeLinkContainer : styles.inactive }>
           <Text style={ styles.tabLink }>{ children }</Text>
@@ -241,6 +262,7 @@ const styles = StyleSheet.create({
   badgeText: {
     color: "#666",
     fontWeight: "bold",
+    fontSize: 10
   },
   physicianContainer: {
     flexDirection: 'row',
