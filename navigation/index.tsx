@@ -19,11 +19,21 @@ import TabTwoScreen from '../screens/TabTwoScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
 
+console.log(DefaultTheme.colors)
+const AlfieTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: "rgb(0,0,0)",
+    card: "#3622b1"
+  }
+}
+console.log(AlfieTheme)
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
-      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      theme={AlfieTheme }>
       <RootNavigator />
     </NavigationContainer>
   );
@@ -58,15 +68,17 @@ function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="Alfie"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarStyle: { backgroundColor: '#3622b1' },
+        tabBarOptions: { }
       }}>
       <BottomTab.Screen
-        name="TabOne"
+        name="Alfie"
         component={TabOneScreen}
-        options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
-          title: 'Tab One',
+        options={({ navigation }: RootTabScreenProps<'Alfie'>) => ({
+          title: 'Alfie',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
             <Pressable
